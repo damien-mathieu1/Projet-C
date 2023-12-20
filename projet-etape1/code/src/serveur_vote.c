@@ -44,6 +44,14 @@ handlerChangementElection() {
 
 int main(int argc, char const *argv[])
 {
+    int needInit = database_exists(argv[1]);
+    struct stat buffer;
+    sqlite3 *db = database_open(argv[1]);
+    if (needInit == -1)
+    {
+        g_print("initilisation de la base de données");
+        database_init(db);
+    }        
     Commande cmd;
     switch(cmd.type) {
         case AJOUT_ELECTEUR:
