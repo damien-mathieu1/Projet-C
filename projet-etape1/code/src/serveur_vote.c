@@ -1,5 +1,6 @@
 #include "../common/include/votechain.h"
 #include "./bd.c"
+#include "./threadpool.c"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -90,7 +91,7 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd,
             fprintf(stderr, "Erreur lors de la soumission de la tâche\n");
         }
         // Attendre et récupérer le résultat
-        void *result = futureGet(&supprimeElecteur);
+        result = futureGet(&supprimeElecteur);
         // Utiliser le résultat...
         printf("result %s", (char *)result);
         break;
@@ -102,7 +103,7 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd,
             fprintf(stderr, "Erreur lors de la soumission de la tâche\n");
         }
         // Attendre et récupérer le résultat
-        void *result = futureGet(&estPresent);
+        result = futureGet(&estPresent);
         // Utiliser le résultat...
         printf("result %s", (char *)result);
         break;
@@ -115,7 +116,7 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd,
             fprintf(stderr, "Erreur lors de la soumission de la tâche\n");
         }
         // Attendre et récupérer le résultat
-        void *result = futureGet(&changementElecteur);
+        result = futureGet(&changementElecteur);
         // Utiliser le résultat...
         printf("result %s", (char *)result);
         break;
@@ -127,7 +128,7 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd,
             fprintf(stderr, "Erreur lors de la soumission de la tâche\n");
         }
         // Attendre et récupérer le résultat
-        void *result = futureGet(&lireInformationElecteur);
+        result = futureGet(&lireInformationElecteur);
         // Utiliser le résultat...
         printf("result %s", (char *)result);
         break;
@@ -139,7 +140,7 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd,
             fprintf(stderr, "Erreur lors de la soumission de la tâche\n");
         }
         // Attendre et récupérer le résultat
-        void *result = futureGet(&ajoutElection);
+        result = futureGet(&ajoutElection);
         // Utiliser le résultat...
         printf("result %s", (char *)result);
         break;
@@ -151,7 +152,7 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd,
             fprintf(stderr, "Erreur lors de la soumission de la tâche\n");
         }
         // Attendre et récupérer le résultat
-        void *result = futureGet(&supprimeElection);
+        result = futureGet(&supprimeElection);
         // Utiliser le résultat...
         printf("result %s", (char *)result);
         break;
@@ -164,7 +165,7 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd,
             fprintf(stderr, "Erreur lors de la soumission de la tâche\n");
         }
         // Attendre et récupérer le résultat
-        void *result = futureGet(&lireResultatElection);
+        result = futureGet(&lireResultatElection);
         // Utiliser le résultat...
         printf("result %s", (char *)result);
         break;
@@ -176,7 +177,7 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd,
             fprintf(stderr, "Erreur lors de la soumission de la tâche\n");
         }
         // Attendre et récupérer le résultat
-        void *result = futureGet(&changementElection);
+        result = futureGet(&changementElection);
         // Utiliser le résultat...
         printf("result %s", (char *)result);
         break;
