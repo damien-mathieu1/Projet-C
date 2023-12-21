@@ -68,7 +68,6 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd)
         case EST_PRESENT:
             handlerEstPresent(db, id);
             break;
-
         case CHANGEMENT_ELECTEUR:
             handlerChangementElecteur(db, id, id2);
             break; 
@@ -78,7 +77,6 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd)
         case AJOUT_ELECTION:
             handlerAjoutElection(db, idElection);
             break;
-
         case SUPPRIME_ELECTION:
             handlerSupprimeElection(db ,idElection);
             break;

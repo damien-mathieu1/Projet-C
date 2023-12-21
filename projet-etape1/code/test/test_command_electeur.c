@@ -9,22 +9,19 @@
 #define ID_SIZE 10
 
 handlerAjoutElecteur(sqlite3 *db, char *id) {
-    createElecteur(db, id, ID_SIZE);
-    int readId = getIdFromNumeroID(db, id, ID_SIZE);
-    g_print("readId = %d\n", readId);
     printf("AJOUT_ELECTEUR\n");
+    createElecteur(db, id, ID_SIZE);
 }
 
 handlerSupprimeElecteur(sqlite3 *db, char *id) {
+    printf("SUPPRIME_ELECTEUR\n");
     deleteElecteur(db, id, ID_SIZE);
     g_assert(electeurExists(db, id, ID_SIZE) == 0);
-
-    printf("SUPPRIME_ELECTEUR\n");
 }
 
 handlerEstPresent(sqlite3 *db, char *id) {
-    g_assert(electeurExists(db, id, ID_SIZE) == 1);
     printf("EST_PRESENT: %d\n");
+    g_assert(electeurExists(db, id, ID_SIZE) == 1);
 }
 
 handlerChangementElecteur(sqlite3 *db, char *id, char *id2) {
@@ -37,8 +34,8 @@ handlerChangementElecteur(sqlite3 *db, char *id, char *id2) {
 }
 
 handlerLireInformationElecteur(sqlite3 *db, char *id) {
-    readElecteur(db, id, ID_SIZE);
     printf("LIRE_INFORMATION_ELECTEUR\n");
+    readElecteur(db, id, ID_SIZE);
 }
 
 commandHandler(sqlite3 *db, char *id, char *id2, Commande cmd) {
@@ -52,7 +49,6 @@ commandHandler(sqlite3 *db, char *id, char *id2, Commande cmd) {
         case EST_PRESENT:
             handlerEstPresent(db, id);
             break;
-
         case CHANGEMENT_ELECTEUR:
             handlerChangementElecteur(db, id, id2);
             break; 
@@ -113,7 +109,6 @@ int main(int argc, char *argv[])
 
         char id[ID_SIZE] = "XXXXXXXXXX";
         char id2[ID_SIZE] = "XXXXXXXXX1";
-        char idElection[ID_SIZE] = "EXXXXXXXXX";
 
         Commande cmd;
 
