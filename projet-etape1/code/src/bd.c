@@ -281,7 +281,7 @@ int Election_getIdFromNumeroID(sqlite3 *db, const char *numeroID, int size)
 }
 
 // TODO
-void readElection(sqlite3 *db, int id)
+void readElection(sqlite3 *db, char id)
 {
     sqlite3_stmt *stmt;
     const char *sql = "SELECT * FROM Election WHERE id = ?;";
@@ -304,7 +304,7 @@ void readElection(sqlite3 *db, int id)
     }
 }
 
-void updateElection(sqlite3 *db, int id, const char *question)
+void updateElection(sqlite3 *db, char id, const char *question)
 {
     sqlite3_stmt *stmt;
     const char *sql = "UPDATE Election SET question = ? WHERE id = ?;";
@@ -327,7 +327,7 @@ void updateElection(sqlite3 *db, int id, const char *question)
     }
 }
 
-void deleteElection(sqlite3 *db, int id)
+void deleteElection(sqlite3 *db, char id)
 {
     sqlite3_stmt *stmt;
     const char *sql = "DELETE FROM Election WHERE id = ?;";
@@ -351,7 +351,7 @@ void deleteElection(sqlite3 *db, int id)
 
 // usecases election
 
-void Election_castVote(sqlite3 *db, int idVotant, int idElection, const void *ballot, int ballotSize, const char *hashValidation)
+void Election_castVote(sqlite3 *db, char idVotant, char idElection, const void *ballot, int ballotSize, const char *hashValidation)
 {
     sqlite3_stmt *stmt;
     const char *sql = "INSERT INTO Vote (idVotant, idElection, timestamp, ballot, hashValidation) VALUES (?, ?, datetime('now'), ?, ?);";
@@ -381,7 +381,7 @@ void Election_castVote(sqlite3 *db, int idVotant, int idElection, const void *ba
 }
 
 //
-void Election_processVotes(sqlite3 *db, int electionId, int *p_option0, int *p_option1, int *p_totalvotes)
+void Election_processVotes(sqlite3 *db, char electionId, int *p_option0, int *p_option1, int *p_totalvotes)
 {
     sqlite3_stmt *stmt;
     const char *sql = "SELECT * FROM Vote WHERE idElection = ?;";

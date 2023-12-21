@@ -18,10 +18,10 @@ int getIdFromNumeroID(sqlite3 *db, const char *numeroID, int size);
 
 // usecases election
 void createElection(sqlite3 *db, const char *identifiant, int sizeId, const char *question, const char *dateDebut, const char *dateFin, const char *status);
-void updateElection(sqlite3 *db, int id, const char *question);
+void updateElection(sqlite3 *db, char id, const char *question);
 int Election_getIdFromNumeroID(sqlite3 *db, const char *numeroID, int size);
 
-void Election_castVote(sqlite3 *db, int idVotant, int idElection, const void *ballot, int ballotSize, const char *hashValidation);
+void Election_castVote(sqlite3 *db, char idVotant, char idElection, const void *ballot, int ballotSize, const char *hashValidation);
 // int Election_resultat(sqlite3 *db, int localid, int *numberOption0, int *numberOption1, int *totalVotes);
-void Election_processVotes(sqlite3 *db, int electionId, int *p_option0, int *p_option1, int *p_totalvotes);
+void Election_processVotes(sqlite3 *db, char electionId, int *p_option0, int *p_option1, int *p_totalvotes);
 #endif
