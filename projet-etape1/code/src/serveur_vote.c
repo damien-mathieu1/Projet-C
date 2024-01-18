@@ -7,7 +7,9 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "../common/include/crypto.h"
 
+#define BALLOT_SIZE 1
 #define ID_SIZE 10
 
 handlerAjoutElecteur(sqlite3 *db, char *id)
@@ -66,7 +68,24 @@ handlerChangementElection(sqlite3 *db, char *id)
     printf("CHANGEMENT_ELECTION\n");
 }
 
-commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd, ThreadPool pool)
+handlerElectionCastVote(sqlite3 *db, char idVotant, char idElection, const void *ballot, const char *hashValidation)
+{
+    Election_castVote(db, idVotant, idElection, ballot, BALLOT_SIZE, hashValidation);
+    printf("ELECTION_CAST_VOTE\n");
+}
+
+handlerElectionProcessVotes(sqlite3 *db, char *id, mpz_t sum_encrypted, mpz_t lambda, mpz_t mu, mpz_t n)
+{
+    int no = 0;
+    int yes = 0;
+    int total = 0;
+    Election_processVotes(db, id, &no, &yes, &total);
+    decrypt(no, sum_encrypted, lambda, mu, n);
+    decrypt(yes, sum_encrypted, lambda, mu, n);
+    printf("ELECTION_PROCESS_VOTES\n");
+}
+
+commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd, ThreadPool pool, const void *ballot, const char *hashValidation, mpz_t sum_encrypted, mpz_t lambda, mpz_t mu, mpz_t n, mpz_t g, mpz_t m, mpz_t c)
 {
     switch (cmd.type)
     {
@@ -181,6 +200,33 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd,
         // Utiliser le résultat...
         printf("result %s", (char *)result);
         break;
+    case ELECTION_CAST_VOTE:
+        mpz_set_ui(m, ballot);
+        encrypt(c, m, n, g);
+        Future electionCastVote;
+        futureInit(&electionCastVote, handlerElectionCastVote(db, id, idElection, m, hashValidation), NULL);
+        if (!submitTaskToPool(&pool, &electionCastVote))
+        {
+            fprintf(stderr, "Erreur lors de la soumission de la tâche\n");
+        }
+        // Attendre et récupérer le résultat
+        result = futureGet(&electionCastVote);
+        // Utiliser le résultat...
+        printf("result %s", (char *)result);
+
+        break;
+    case ELECTION_PROCESS_VOTES:
+        Future electionProcessVotes;
+        futureInit(&electionProcessVotes, handlerElectionProcessVotes(db, idElection, sum_encrypted, lambda, mu, n), NULL);
+        if (!submitTaskToPool(&pool, &electionProcessVotes))
+        {
+            fprintf(stderr, "Erreur lors de la soumission de la tâche\n");
+        }
+        // Attendre et récupérer le résultat
+        result = futureGet(&electionProcessVotes);
+        // Utiliser le résultat...
+        printf("result %s", (char *)result);
+        break;
     default:
         printf("NOP\n");
     }
@@ -188,6 +234,12 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd,
 
 int main(int argc, char const *argv[])
 {
+    mpz_t n, lambda, g, mu, m, c, sum_encrypted;
+    mpz_inits(n, lambda, g, mu, m, c, NULL);
+    mpz_inits(sum_encrypted, NULL);
+    // Generate keys
+    generate_keys(n, lambda, g, mu);
+
     int needInit = database_exists("./db");
     struct stat buffer;
     sqlite3 *db = database_open("./db");
@@ -208,9 +260,51 @@ int main(int argc, char const *argv[])
     char id2[ID_SIZE] = "XXXXXXXXX1";
     char idElection[ID_SIZE] = "EXXXXXXXXX";
 
+    const char *command = argv[1];
     Commande cmd;
-    cmd.type = AJOUT_ELECTEUR;
 
-    commandHandler(db, id, id2, idElection, cmd, pool);
+    if (strcmp(command, "AJOUT_ELECTEUR") == 0)
+    {
+        cmd.type = AJOUT_ELECTEUR;
+    }
+    else if (strcmp(command, "SUPPRIMER_ELECTEUR") == 0)
+    {
+        cmd.type = SUPPRIME_ELECTEUR;
+    }
+    else if (strcmp(command, "AJOUT_ELECTION") == 0)
+    {
+        cmd.type = AJOUT_ELECTION;
+    }
+    else if (strcmp(command, "SUPPRIMER_ELECTION") == 0)
+    {
+        cmd.type = SUPPRIME_ELECTION;
+    }
+    else if (strcmp(command, "EST_PRESENT") == 0)
+    {
+        cmd.type = EST_PRESENT;
+    }
+    else if (strcmp(command, "CHANGEMENT_ELECTEUR") == 0)
+    {
+        cmd.type = CHANGEMENT_ELECTEUR;
+    }
+    else if (strcmp(command, "LIRE_INFORMATION_ELECTEUR") == 0)
+    {
+        cmd.type = LIRE_INFORMATION_ELECTEUR;
+    }
+    else if (strcmp(command, "LIRE_RESULTAT_ELECTION") == 0)
+    {
+        cmd.type = LIRE_RESULTAT_ELECTION;
+    }
+    else if (strcmp(command, "CHANGEMENT_ELECTION") == 0)
+    {
+        cmd.type = CHANGEMENT_ELECTION;
+    }
+    else
+    {
+        fprintf(stderr, "Commande inconnue: %s\n", command);
+        return 1;
+    }
+
+    commandHandler(db, id, id2, idElection, cmd, pool, NULL, NULL, sum_encrypted, lambda, mu, n, g, m, c);
     return 0;
 }
