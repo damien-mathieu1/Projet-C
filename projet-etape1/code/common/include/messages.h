@@ -28,19 +28,23 @@ typedef struct
     char identifiant[ENTITY_ID_SIZE];
 } LireInformationElecteurCmd;
 
-typedef struct {
+typedef struct
+{
     char identifiant[ENTITY_ID_SIZE];
 } AjoutElectionCmd;
 
-typedef struct {
+typedef struct
+{
     char identifiant[ENTITY_ID_SIZE];
 } SupprimeElectionCmd;
 
-typedef struct {
+typedef struct
+{
     char identifiant[ENTITY_ID_SIZE];
 } LireResultatElectionCmd;
 
-typedef struct {
+typedef struct
+{
     char identifiant[ENTITY_ID_SIZE];
 } ChangementElectionCmd;
 
@@ -55,7 +59,9 @@ typedef enum
     AJOUT_ELECTION,
     SUPPRIME_ELECTION,
     LIRE_RESULTAT_ELECTION,
-    CHANGEMENT_ELECTION
+    CHANGEMENT_ELECTION,
+    ELECTION_CAST_VOTE,
+    ELECTION_PROCESS_VOTES
 } CommandType;
 
 //--
