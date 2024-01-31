@@ -7,7 +7,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "../common/include/crypto.h"
+#include "./crypto.c"
 
 #define BALLOT_SIZE 1
 #define ID_SIZE 10
@@ -262,48 +262,6 @@ int main(int argc, char const *argv[])
 
     const char *command = argv[1];
     Commande cmd;
-
-    if (strcmp(command, "AJOUT_ELECTEUR") == 0)
-    {
-        cmd.type = AJOUT_ELECTEUR;
-    }
-    else if (strcmp(command, "SUPPRIMER_ELECTEUR") == 0)
-    {
-        cmd.type = SUPPRIME_ELECTEUR;
-    }
-    else if (strcmp(command, "AJOUT_ELECTION") == 0)
-    {
-        cmd.type = AJOUT_ELECTION;
-    }
-    else if (strcmp(command, "SUPPRIMER_ELECTION") == 0)
-    {
-        cmd.type = SUPPRIME_ELECTION;
-    }
-    else if (strcmp(command, "EST_PRESENT") == 0)
-    {
-        cmd.type = EST_PRESENT;
-    }
-    else if (strcmp(command, "CHANGEMENT_ELECTEUR") == 0)
-    {
-        cmd.type = CHANGEMENT_ELECTEUR;
-    }
-    else if (strcmp(command, "LIRE_INFORMATION_ELECTEUR") == 0)
-    {
-        cmd.type = LIRE_INFORMATION_ELECTEUR;
-    }
-    else if (strcmp(command, "LIRE_RESULTAT_ELECTION") == 0)
-    {
-        cmd.type = LIRE_RESULTAT_ELECTION;
-    }
-    else if (strcmp(command, "CHANGEMENT_ELECTION") == 0)
-    {
-        cmd.type = CHANGEMENT_ELECTION;
-    }
-    else
-    {
-        fprintf(stderr, "Commande inconnue: %s\n", command);
-        return 1;
-    }
 
     commandHandler(db, id, id2, idElection, cmd, pool, NULL, NULL, sum_encrypted, lambda, mu, n, g, m, c);
     return 0;
