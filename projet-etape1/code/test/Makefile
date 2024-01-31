@@ -8,7 +8,10 @@ PROJECTLIB=-lvoting
 
 $(shell mkdir -p $(BUILDDIR))
 
-all: $(BUILDDIR)/test_electeur $(BUILDDIR)/test_election $(BUILDDIR)/test_vote $(BUILDDIR)/test_command_electeur $(BUILDDIR)/test_crypto
+all: $(BUILDDIR)/test_electeur $(BUILDDIR)/test_election $(BUILDDIR)/test_vote $(BUILDDIR)/test_command_electeur $(BUILDDIR)/test_crypto $(BUILDDIR)/test_future
+
+$(BUILDDIR)/test_future: test_future.c
+	$(CC) test_future.c $(CFLAGS) $(PROJECTLIBDIR) $(PROJECTLIB) $(LIBS) -o $(BUILDDIR)/test_future
 
 $(BUILDDIR)/test_electeur: test_electeur.c
 	$(CC) test_electeur.c $(CFLAGS) $(PROJECTLIBDIR) $(PROJECTLIB) $(LIBS) -o $(BUILDDIR)/test_electeur

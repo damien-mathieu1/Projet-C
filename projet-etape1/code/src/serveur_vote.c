@@ -8,9 +8,39 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "./crypto.c"
+#include <signal.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 
 #define BALLOT_SIZE 1
 #define ID_SIZE 10
+
+int sock, lg, port;
+
+struct sockaddr_in local; // champs d entete local
+struct sockaddr_in distant; // champs d entete distant
+
+void creer_socket()
+{
+    // preparation des champs d entete
+    bzero(&local, sizeof(local)); // mise a zero de la zone adresse
+    local.sin_family = AF_INET; // famille d adresse internet
+    local.sin_port = htons(port); // numero de port
+    local.sin_addr.s_addr = INADDR_ANY; // types d adresses prises en charge
+    bzero(&(local.sin_zero),8); // fin de remplissage
+    lg = sizeof(struct sockaddr_in);
+    // creation socket du serveur mode TCP/IP
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        perror("socket");
+        exit(1);
+    }
+    // nommage de la socket
+    if (bind(sock, (struct sockaddr *) &local, sizeof(struct sockaddr)) == -1) {
+        perror("bind");
+        exit(1);
+    }
+}
 
 handlerAjoutElecteur(sqlite3 *db, char *id)
 {
@@ -232,8 +262,32 @@ commandHandler(sqlite3 *db, char *id, char *id2, char *idElection, Commande cmd,
     }
 }
 
+CommandType getCommandType(const char* command) {
+    if (strcmp(command, "AJOUT_ELECTEUR") == 0) return AJOUT_ELECTEUR;
+    if (strcmp(command, "SUPPRIMER_ELECTEUR") == 0) return SUPPRIME_ELECTEUR;
+    if (strcmp(command, "AJOUT_ELECTION") == 0) return AJOUT_ELECTION;
+    if (strcmp(command, "SUPPRIMER_ELECTION") == 0) return SUPPRIME_ELECTION;
+    if (strcmp(command, "EST_PRESENT") == 0) return EST_PRESENT;
+    if (strcmp(command, "CHANGEMENT_ELECTEUR") == 0) return CHANGEMENT_ELECTEUR;
+    if (strcmp(command, "LIRE_INFORMATION_ELECTEUR") == 0) return LIRE_INFORMATION_ELECTEUR;
+    if (strcmp(command, "LIRE_RESULTAT_ELECTION") == 0) return LIRE_RESULTAT_ELECTION;
+    if (strcmp(command, "CHANGEMENT_ELECTION") == 0) return CHANGEMENT_ELECTION;
+    return NOP;
+}
+
+void ferme(int sig) {
+    close(sock);
+    exit(0);
+}
+
 int main(int argc, char const *argv[])
 {
+
+    port = atoi(argv[1] ? argv[1] : "12345");
+
+
+    signal(SIGINT, ferme);
+
     mpz_t n, lambda, g, mu, m, c, sum_encrypted;
     mpz_inits(n, lambda, g, mu, m, c, NULL);
     mpz_inits(sum_encrypted, NULL);
@@ -256,13 +310,50 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    char id[ID_SIZE] = "XXXXXXXXXX";
-    char id2[ID_SIZE] = "XXXXXXXXX1";
-    char idElection[ID_SIZE] = "EXXXXXXXXX";
 
-    const char *command = argv[1];
-    Commande cmd;
+    creer_socket();
 
-    commandHandler(db, id, id2, idElection, cmd, pool, NULL, NULL, sum_encrypted, lambda, mu, n, g, m, c);
+    // mise a l ecoute
+    if (listen(sock, 5) == -1) {
+        perror("listen");
+        exit(1);
+    }
+
+    // boucle sans fin pour la gestion des connexions
+    while (1) { // attente connexion client
+        pthread_t thread;
+        int socket2;
+
+        printf("En attente d un client\n");
+
+        if ((socket2 = accept(sock, (struct sockaddr *)&distant, (socklen_t *)&lg)) == -1) {
+            perror("accept");
+            exit(1);
+        }
+
+        char id[ID_SIZE] = "XXXXXXXXXX";
+        char id2[ID_SIZE] = "XXXXXXXXX1";
+        char idElection[ID_SIZE] = "EXXXXXXXXX";
+
+        char command[100];
+
+        do {
+            int r = read(socket2, command, 100);
+
+            command[strlen(command) - 1] = '\0';
+
+            Commande cmd;
+            cmd.type = getCommandType(command);
+
+            if (cmd.type == NOP) {
+                fprintf(stderr, "Commande inconnue: %s\n", command);
+                return 1;
+            }
+
+            commandHandler(db, id, id2, idElection, cmd, pool, NULL, NULL, sum_encrypted, lambda, mu, n, g, m, c);
+
+        } while (strcmp(command, "STOP") == 0);
+    }
+
     return 0;
 }

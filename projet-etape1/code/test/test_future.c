@@ -22,7 +22,7 @@ void *maFonctionErreur(void *arg)
 }
 
 // Programme principal
-int main()
+int main(int argc, char *argv[])
 {
     ThreadPool pool;
     if (!initThreadPool(&pool, 4, 10))

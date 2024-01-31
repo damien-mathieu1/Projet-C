@@ -21,10 +21,10 @@ OBJ=$(SRC:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 $(shell mkdir -p $(LIBDIR) $(OBJDIR))
 
 # Cible par défaut
-all: $(LIBDIR)/$(LIBNAME) $(BUILDDIR)/main $(DEPS)
+all: $(LIBDIR)/$(LIBNAME) $(BUILDDIR)/server $(DEPS)
 
-$(BUILDDIR)/main: serveur_vote.c
-	$(CC) serveur_vote.c $(CFLAGS) $(PROJECTLIBDIR) $(PROJECTLIB) $(LIBS) -lgmp -o $(BUILDDIR)/main 
+$(BUILDDIR)/server: serveur_vote.c
+	$(CC) serveur_vote.c $(CFLAGS) $(PROJECTLIBDIR) $(PROJECTLIB) $(LIBS) -lgmp -o $(BUILDDIR)/server 
 
 	
 # Règle pour construire la bibliothèque
